@@ -6,7 +6,7 @@ The action is dependency-free JavaScript and runs on Node 20. `action.yml` point
 
 ## Usage
 
-Pin every third-party action to a full 40-character commit SHA. This repository does not publish tags or a Marketplace release. From another repo, replace `<full-commit-sha>` with the commit you trust. In this repo, `uses: ./` runs the action on the commit you checked out.
+Pin every third-party action to a full 40-character commit SHA. The moving major tag is `v1`. This action is not listed on the GitHub Marketplace yet. In this repo, `uses: ./` runs the action on the commit you checked out. The copy-paste workflow is `docs/example-workflow.yml`.
 
 `actions/checkout` is **Unlocked** in the ReleaseLock directory. A commit pin stops the tag from moving, and it does not change that integrity result. `fail-on: unlocked` still fails a pinned checkout. The example allow-lists `actions/checkout` so the rest of the workflow is held to the unlocked bar. The allow list also skips the SHA pin rule for that repo, so leave the checkout step pinned yourself.
 
@@ -28,14 +28,14 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: ReleaseLock gate
-        uses: cassiecrossley/releaselock-action@<full-commit-sha>
+        uses: cassiecrossley/releaselock-action@v1
         with:
           fail-on: unlocked
           require-sha-pinning: true
           allow-list: actions/checkout
 ```
 
-To fail when checkout itself is Unlocked, remove `allow-list`. To enforce SHA pins only, set `fail-on: none`. The self-test in `.github/workflows/self-gate.yml` uses `fail-on: none` and `require-sha-pinning: true`, because this repo has to check out its own code before it can run `uses: ./`.
+To fail when checkout itself is Unlocked, remove `allow-list`. To enforce SHA pins only, set `fail-on: none`. Prefer a full commit SHA pin over `@v1` when you want the gate itself locked to one release. The v1.0.0 release notes include that SHA.
 
 ## Inputs
 
@@ -105,9 +105,9 @@ Local actions (`./` and `./path`) and `docker://` images are classified by the A
 
 A body that is not valid JSON currently gets HTTP 200 and an empty success payload. This action always sends JSON.
 
-## Self-test
+## Tests
 
-`.github/workflows/self-gate.yml` checks out this repo with `actions/checkout` pinned to `3d3c42e5aac5ba805825da76410c181273ba90b1` (`v7.0.1`), runs `node --test`, then runs the action with `fail-on: none` and `require-sha-pinning: true`. A second step scans `test/fixtures/unlocked-tag/ci.yml` (`actions/checkout@v4`) and requires `policy-failed=true`.
+This repository has no `.github/workflows` directory, which GitHub Marketplace requires. Run the unit tests locally with `node --test`. A consumer workflow example is in `docs/example-workflow.yml`.
 
 ## Local checks
 

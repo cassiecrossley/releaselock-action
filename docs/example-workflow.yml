@@ -1,0 +1,32 @@
+# Usage example. Do not move this file under .github/workflows.
+# GitHub Marketplace requires the action repository to contain no workflow files.
+#
+# actions/checkout is Unlocked in the ReleaseLock directory. The allow list
+# below keeps that checkout from failing an unlocked bar. The checkout step
+# is still pinned to a full commit SHA. Remove allow-list to fail when
+# checkout itself is Unlocked.
+#
+# Prefer pinning this action to the full commit SHA published on the v1.0.0
+# release. @v1 is the moving major tag.
+name: ReleaseLock
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: ReleaseLock gate
+        uses: cassiecrossley/releaselock-action@v1
+        with:
+          fail-on: unlocked
+          require-sha-pinning: true
+          allow-list: actions/checkout
