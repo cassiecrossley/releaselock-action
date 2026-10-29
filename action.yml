@@ -12,14 +12,14 @@ inputs:
       unlocked (default), checksums-only, and signed currently fail Unknown,
       Unlocked, and Checksums only. attested also fails Signed. immutable
       fails anything short of Immutable. none skips integrity failures.
-      Unrecognized values are forwarded to the API.
+      Any other value is rejected by the API with HTTP 400.
     required: false
     default: 'unlocked'
   require-sha-pinning:
     description: >
       When true, uses: refs must be a full 40-character commit SHA.
-      Mutable tags fail. The action sends a JSON boolean (the API treats
-      the string "false" as true).
+      Mutable tags fail. The action sends a JSON boolean. The API also
+      accepts string booleans such as "true" and "false".
     required: false
     default: 'true'
   allow-list:

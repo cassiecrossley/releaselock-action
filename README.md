@@ -28,14 +28,14 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: ReleaseLock gate
-        uses: cassiecrossley/releaselock-action@v1
+        uses: cassiecrossley/releaselock-action@050a1a6d652d23443ff4add2cd064cbcfd42f856 # v1.0.0
         with:
           fail-on: unlocked
           require-sha-pinning: true
           allow-list: actions/checkout
 ```
 
-To fail when checkout itself is Unlocked, remove `allow-list`. To enforce SHA pins only, set `fail-on: none`. Prefer a full commit SHA pin over `@v1` when you want the gate itself locked to one release. The v1.0.0 release notes include that SHA.
+To fail when checkout itself is Unlocked, remove `allow-list`. To enforce SHA pins only, set `fail-on: none`. The example pins v1.0.0 (`050a1a6d652d23443ff4add2cd064cbcfd42f856`). Use `cassiecrossley/releaselock-action@v1` to follow the major line.
 
 ## Inputs
 
@@ -60,7 +60,7 @@ The step also writes a Markdown table to the job summary, with one row per ref.
 
 ## API
 
-Checked against the live service at [releaselock.dev](https://releaselock.dev) on 2026-10-29. The gate calls:
+Rechecked against the live service at [releaselock.dev](https://releaselock.dev) on 2026-10-29. The gate calls:
 
 `POST https://releaselock.dev/v1/scan/workflows`
 
@@ -73,9 +73,9 @@ Checked against the live service at [releaselock.dev](https://releaselock.dev) o
 }
 ```
 
-The action reads workflow files locally, collects `uses:` values, and posts that list. The endpoint does not accept workflow YAML. `actions` is the field this action sends. `refs` and a string array named `workflows` are also accepted, and `actions` wins if more than one is set. Objects in the array are stringified to `[object Object]` and scored as invalid refs.
+The action reads workflow files locally, collects `uses:` values, and posts that list as `actions`. The same endpoint accepts raw workflow YAML in `workflows`: a string, an array of YAML strings, or objects with `path` and `content`. It extracts `uses:` from that YAML. `refs` is another alias for a ref list. When `actions` and `workflows` are both present, `actions` wins.
 
-`require_sha_pinning` has to be a JSON boolean. The string `"false"` is treated as true. This action always sends a boolean.
+`require_sha_pinning` accepts a JSON boolean or a string boolean. `"false"`, `"no"`, and `"0"` are false. `"true"` is true. This action sends a JSON boolean.
 
 `allow_list` may be a comma-separated string or a JSON array. `owner/repo` matches every ref of that repository. `owner/repo@ref` matches that ref only. `actions/*` does not match.
 
@@ -91,7 +91,7 @@ These are the bars the live API applied, not a ladder assumed by an older scaffo
 | `signed` | Same as `unlocked` today. Signed does not fail. |
 | `attested` | Unknown through Signed. Attested and Immutable pass. |
 | `immutable` | Anything that is not Immutable. |
-| any other value | Echoed back, and today it behaves like `unlocked`. |
+| any other value | HTTP 400 `invalid_fail_on`. Allowed values are `unlocked`, `checksums-only`, `signed`, `attested`, `immutable`, and `none`. An empty `fail_on` still defaults to `unlocked`. |
 
 Aliases `checksums only`, `checksums_only`, and `off` (`none`) are normalized before the request.
 
@@ -99,7 +99,7 @@ Local actions (`./` and `./path`) and `docker://` images are classified by the A
 
 ### Endpoints that are not the gate
 
-`POST /v1/verify` returns 404. `GET /v1/verify/{owner}/{repo}` returns the latest tracked release for that repository. A tag or SHA added to the path is ignored: `GET /v1/verify/actions/checkout/v4` still returns tag `v7.0.1`. The gate does not use that route, because it cannot score the ref written in the workflow.
+`POST /v1/verify` returns 404. `GET /v1/verify/{owner}/{repo}` returns the latest tracked release when no selector is set. `?ref=`, `?tag=`, and `?sha=` all select a release. The response includes `requested_ref`, `ref_tracked`, `matched_by`, and `fallback`. A tracked value matches an exact tag (`matched_by: tag`), a full commit SHA (`sha`), a SHA prefix (`sha_prefix`), or a major version such as `v7` (`major_prefix`). A 7-character prefix of the tracked commit matched. A 4-character prefix did not. An untracked value still returns the latest release with `ref_tracked: false`, `fallback: latest`, and `ref_message`. For `actions/checkout`, `v4` is untracked because the tracked release is `v7.0.1`. The same lookup accepts a path segment (`/v1/verify/actions/checkout/v7` matches `major_prefix`). The gate keeps calling `POST /v1/scan/workflows`, which scores every workflow ref in one request.
 
 `GET /v1/directory` is the public directory behind [releaselock.dev](https://releaselock.dev). `GET /v1/health` reports liveness.
 
