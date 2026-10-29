@@ -1,5 +1,5 @@
 name: 'ReleaseLock Gate'
-description: 'Fail or warn when workflow actions are not locked down (immutable, attested, or SHA pinned) according to the ReleaseLock API.'
+description: 'Fail or warn when actions are unlocked or not pinned to a commit SHA.'
 author: 'ReleaseLock'
 branding:
   icon: 'shield'
