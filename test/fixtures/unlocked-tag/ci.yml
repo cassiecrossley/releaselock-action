@@ -1,0 +1,7 @@
+name: unlocked-tag
+on: push
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
