@@ -1,0 +1,62 @@
+name: 'ReleaseLock Gate'
+description: 'Fail or warn when workflow actions are not locked down (immutable, attested, or SHA pinned) according to the ReleaseLock API.'
+author: 'ReleaseLock'
+branding:
+  icon: 'shield'
+  color: 'purple'
+
+inputs:
+  fail-on:
+    description: >
+      Integrity bar forwarded to POST /v1/scan/workflows as fail_on.
+      unlocked (default), checksums-only, and signed currently fail Unknown,
+      Unlocked, and Checksums only. attested also fails Signed. immutable
+      fails anything short of Immutable. none skips integrity failures.
+      Unrecognized values are forwarded to the API.
+    required: false
+    default: 'unlocked'
+  require-sha-pinning:
+    description: >
+      When true, uses: refs must be a full 40-character commit SHA.
+      Mutable tags fail. The action sends a JSON boolean (the API treats
+      the string "false" as true).
+    required: false
+    default: 'true'
+  allow-list:
+    description: >
+      Comma-separated owner/repo or owner/repo@ref exemptions. A match skips
+      both the integrity failure and the SHA pin failure for that ref.
+      Wildcards are not supported.
+    required: false
+    default: ''
+  api-base:
+    description: 'ReleaseLock API base URL with no trailing slash.'
+    required: false
+    default: 'https://releaselock.dev'
+  scan-dockerfiles:
+    description: >
+      Warn on Dockerfile ADD/COPY http(s) URLs and curl piped to a shell.
+      These warnings do not fail the job.
+    required: false
+    default: 'true'
+  workflow-glob:
+    description: 'Comma-separated glob of workflow files relative to the workspace.'
+    required: false
+    default: '.github/workflows/*.yml,.github/workflows/*.yaml'
+  on-failure:
+    description: >
+      fail (default) fails the job when the API reports policy_failed.
+      warn records warnings and leaves the job green. API errors still fail
+      the job.
+    required: false
+    default: 'fail'
+
+outputs:
+  policy-failed:
+    description: 'true when the ReleaseLock policy matched at least one dependency'
+  result-json:
+    description: 'JSON body returned by POST /v1/scan/workflows'
+
+runs:
+  using: 'node20'
+  main: 'src/index.js'
