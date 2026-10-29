@@ -6,8 +6,7 @@
 # is still pinned to a full commit SHA. Remove allow-list to fail when
 # checkout itself is Unlocked.
 #
-# Prefer pinning this action to the full commit SHA published on the v1.0.0
-# release. @v1 is the moving major tag.
+# v1.0.0 is pinned below. @v1 is the moving major tag.
 name: ReleaseLock
 on:
   pull_request:
@@ -25,7 +24,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: ReleaseLock gate
-        uses: cassiecrossley/releaselock-action@v1
+        uses: cassiecrossley/releaselock-action@050a1a6d652d23443ff4add2cd064cbcfd42f856 # v1.0.0
         with:
           fail-on: unlocked
           require-sha-pinning: true
