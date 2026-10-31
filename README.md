@@ -6,7 +6,7 @@ The action is dependency-free JavaScript and runs on Node 20. `action.yml` point
 
 ## Usage
 
-Pin every third-party action to a full 40-character commit SHA. The moving major tag is `v1`. This action is not listed on the GitHub Marketplace yet. In this repo, `uses: ./` runs the action on the commit you checked out. The copy-paste workflow is `docs/example-workflow.yml`.
+Pin every third-party action to a full 40-character commit SHA. The moving major tag is `v1`. It is listed on the GitHub Marketplace as [ReleaseLock Gate](https://github.com/marketplace/actions/releaselock-gate). In this repo, `uses: ./` runs the action on the commit you checked out. The copy-paste workflow is `docs/example-workflow.yml`.
 
 `actions/checkout` is **Unlocked** in the ReleaseLock directory. A commit pin stops the tag from moving, and it does not change that integrity result. `fail-on: unlocked` still fails a pinned checkout. The example allow-lists `actions/checkout` so the rest of the workflow is held to the unlocked bar. The allow list also skips the SHA pin rule for that repo, so leave the checkout step pinned yourself.
 
@@ -103,7 +103,7 @@ Local actions (`./` and `./path`) and `docker://` images are classified by the A
 
 `GET /v1/directory` is the public directory behind [releaselock.dev](https://releaselock.dev). `GET /v1/health` reports liveness.
 
-A body that is not valid JSON currently gets HTTP 200 and an empty success payload. This action always sends JSON.
+The scan API fails closed on bad input. An empty body or invalid JSON gets HTTP 400 (`empty_body`, `invalid_json`), a non-JSON `Content-Type` gets 415, a body over 1 MB gets 413, and a request with no `uses:` refs to check gets 422 (`no_refs_found`). This action always sends JSON with at least one ref, and it fails the job on any non-2xx response.
 
 ## Tests
 
