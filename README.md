@@ -28,14 +28,14 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: ReleaseLock gate
-        uses: cassiecrossley/releaselock-action@050a1a6d652d23443ff4add2cd064cbcfd42f856 # v1.0.0
+        uses: cassiecrossley/releaselock-action@a42f61f82722d44dd1b96400f0fbe82592b25a0f # v1.0.1
         with:
           fail-on: unlocked
           require-sha-pinning: true
           allow-list: actions/checkout
 ```
 
-To fail when checkout itself is Unlocked, remove `allow-list`. To enforce SHA pins only, set `fail-on: none`. The example pins v1.0.0 (`050a1a6d652d23443ff4add2cd064cbcfd42f856`). Use `cassiecrossley/releaselock-action@v1` to follow the major line.
+To fail when checkout itself is Unlocked, remove `allow-list`. To enforce SHA pins only, set `fail-on: none`. The example pins v1.0.1 (`a42f61f82722d44dd1b96400f0fbe82592b25a0f`), the first immutable release. Use `cassiecrossley/releaselock-action@v1` to follow the major line.
 
 ## Inputs
 
