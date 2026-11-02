@@ -5,6 +5,7 @@
  */
 'use strict';
 
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
@@ -237,6 +238,19 @@ function buildSummary({ failOn, requireSha, onFailure, rows, findings, policyFai
   return md;
 }
 
+/**
+ * Anonymous usage signal. Sends a one-way SHA-256 of the repository name so
+ * ReleaseLock can count distinct repos per day. The repo name itself is never sent.
+ * Turn off with `anonymous-usage: false`.
+ */
+function usageHeaders(env, enabled) {
+  if (!enabled) return {};
+  const repo = String(env.GITHUB_REPOSITORY || '').trim().toLowerCase();
+  if (!repo) return {};
+  const hash = crypto.createHash('sha256').update(`releaselock-gate-v1:${repo}`).digest('hex');
+  return { 'x-releaselock-repo-hash': hash };
+}
+
 async function runReleaseLock(options = {}) {
   const env = options.env || process.env;
   const fetchImpl = options.fetchImpl || globalThis.fetch;
@@ -252,6 +266,7 @@ async function runReleaseLock(options = {}) {
   const onFailureInput = String(getInput(env, 'on-failure', 'fail')).trim().toLowerCase();
   const onFailure = normalizeOnFailure(onFailureInput);
   const workflowGlob = getInput(env, 'workflow-glob', DEFAULT_GLOB);
+  const anonymousUsage = getBooleanInput(env, 'anonymous-usage', true);
   const knownOnFailure = new Set(['', 'fail', 'error', 'warn', 'warning']);
 
   if (!knownOnFailure.has(onFailureInput)) {
@@ -344,6 +359,7 @@ async function runReleaseLock(options = {}) {
           'content-type': 'application/json',
           accept: 'application/json',
           'user-agent': 'releaselock-action',
+          ...usageHeaders(env, anonymousUsage),
         },
         body: JSON.stringify(payload),
         signal: AbortSignal.timeout(60000),
@@ -451,6 +467,7 @@ if (require.main === module) {
 
 module.exports = {
   runReleaseLock,
+  usageHeaders,
   extractUsesRefs,
   extractDockerfileFindings,
   splitGlobList,

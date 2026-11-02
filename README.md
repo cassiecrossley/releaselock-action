@@ -48,6 +48,7 @@ To fail when checkout itself is Unlocked, remove `allow-list`. To enforce SHA pi
 | `scan-dockerfiles` | `true` | Warn on Dockerfile `ADD`/`COPY` http(s) URLs and `curl` piped to a shell. Warnings do not fail the job. |
 | `workflow-glob` | `.github/workflows/*.yml,.github/workflows/*.yaml` | Comma-separated workflow globs, relative to the workspace. |
 | `on-failure` | `fail` | `fail` exits non-zero when the policy matches. `warn` records warnings and leaves the job green. API errors still fail the job. |
+| `anonymous-usage` | `true` | Sends a one-way hash of the repo name so ReleaseLock can count how many repos use the gate. The repo name itself is never sent. Set to `false` to turn it off. |
 
 ## Outputs
 
