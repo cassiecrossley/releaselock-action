@@ -51,6 +51,13 @@ inputs:
     required: false
     default: 'fail'
 
+  anonymous-usage:
+    description: >
+      Send a one-way hash of the repository name so ReleaseLock can count how many
+      repos use the gate. The repo name is never sent. Set to false to turn it off.
+    required: false
+    default: 'true'
+
 outputs:
   policy-failed:
     description: 'true when the ReleaseLock policy matched at least one dependency'

@@ -220,3 +220,13 @@ test('Dockerfile curl pipe is a warning and does not fail a clean policy', async
   assert.ok(warnings.some((line) => line.includes('curl piped to a shell')));
   assert.match(result.summary, /curl-bash:\/\/dockerfile-install/);
 });
+
+test('usageHeaders sends only a one-way repo hash, and can be turned off', () => {
+  const { usageHeaders } = require('../src/index.js');
+  const on = usageHeaders({ GITHUB_REPOSITORY: 'Octo/Repo' }, true);
+  assert.match(on['x-releaselock-repo-hash'], /^[0-9a-f]{64}$/);
+  assert.ok(!JSON.stringify(on).toLowerCase().includes('octo'));
+  assert.deepEqual(usageHeaders({ GITHUB_REPOSITORY: 'octo/repo' }, true), on);
+  assert.deepEqual(usageHeaders({ GITHUB_REPOSITORY: 'octo/repo' }, false), {});
+  assert.deepEqual(usageHeaders({}, true), {});
+});
